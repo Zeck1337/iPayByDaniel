@@ -1,0 +1,236 @@
+/*Learning programming logic, using C# to create a program that organizes personal expenses in a Console to apply basic concepts of CRUD*/
+
+
+using System;
+using System.Globalization;
+
+
+namespace iPayByDaniel
+{
+
+    class Program
+    {
+
+
+        static void Main(string[] args)
+        {
+
+            const int maximoDespesa = 5;
+            int contadorDespesa = 0; // Para usar o leangth 
+            Despesa[] despesas = new Despesa[maximoDespesa]; // Array para armazenar as despesa
+
+            //limitando inserção de despesa para no maximo 5 depesa para realizar o processo do CRUD
+
+
+
+            while (true)
+            {
+                Console.WriteLine("\nMenu");
+                Console.WriteLine("1. Adicionar Despesa");
+                Console.WriteLine("2. Listar Despesas");
+                Console.WriteLine("3. Editar Despesa");
+                Console.WriteLine("4. Excluir Despesa");
+                Console.WriteLine("0. Sair");
+                Console.Write("Escolha uma opção: ");
+                ConsoleKeyInfo opcao = Console.ReadKey(intercept: true);
+
+                switch (opcao.KeyChar)
+                {
+                    case '1':
+                        adicionarDespesa(despesas, ref contadorDespesa, maximoDespesa);
+                        break;
+                    case '2':
+                        listaDespesa(despesas, contadorDespesa);
+                        break;
+                    case '3':
+                        editarDespesa(despesas,contadorDespesa);
+                        break;
+                    case '4':
+                        deletarDespesa(despesas, ref contadorDespesa);
+                        break;
+                    case '0':
+                        return;
+                    default:
+                        Console.WriteLine("Opção inválida. Tente novamente.");
+                        break;
+                }
+            }
+
+            static void adicionarDespesa(Despesa[] despesas, ref int contador, int maximoDespesa)
+            {
+                if (contador >= maximoDespesa)
+                {
+                    Console.WriteLine("Limite de despesa atingido");
+                    return;
+                }
+
+                Console.WriteLine("\nNome da Despesa: ");
+                string nomeDaDespesa = Console.ReadLine();
+
+                Console.WriteLine("Digite o valor da despesa");
+                if (float.TryParse(Console.ReadLine(), out float valorDepesa))
+                {
+                    Console.WriteLine($"valor da despesa: {valorDepesa}");
+                }
+                else
+                {
+                    Console.WriteLine("Valor Invalido ");
+                }
+                Console.WriteLine("Por favor insira o vencimento do Debito");
+
+                DateTime dataVencimento;
+
+
+                Console.WriteLine("Digite no formato dd/MM/YYYY: ");
+                string d = Console.ReadLine();
+
+                //partiu tentar convertar a data insirida pelo usuario
+
+                if (DateTime.TryParseExact(d, "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out dataVencimento))
+                {
+                    Console.WriteLine($"Sua data de vencimento:{dataVencimento}");
+                }
+                else
+                {
+                    Console.WriteLine("Data invalida");
+                }
+
+                int id = contador + 1;
+
+                despesas[contador] = new Despesa(id, nomeDaDespesa, valorDepesa, dataVencimento);
+                contador++;
+            }
+
+
+
+            }
+            static void listaDespesa(Despesa[] despesas, int contador)
+            {
+                if (contador == 0)
+                {
+                    Console.WriteLine("Nenhuma despesa cadastrada");
+                    return;
+                }
+
+                Console.WriteLine("\nLista de despesas:");
+                foreach (var despesa in despesas)
+                {
+                    if (despesa != null)
+                    {
+                        Console.WriteLine($"ID: {despesa.Id} | Nome: {despesa.Nome} | Valor: {despesa.Valor} | Data de Vencimento: {despesa.DataVencimento:dd/MM/yyyy}");
+                    }
+                }
+            }
+
+
+                 class Despesa
+        {
+            public int Id { get; set; }
+            public string Nome { get; set; }
+            public float Valor { get; set; }
+            public DateTime DataVencimento { get; set; }
+
+
+            public Despesa(int id, string nome, float valor, DateTime dataVencimento)
+            {
+                Id = id;
+                Nome = nome;
+                Valor = valor;
+                DataVencimento = dataVencimento;
+            }
+        }
+
+        static void editarDespesa(Despesa[] despesas, int contador)
+        {
+            if (contador == 0)
+            {
+                Console.WriteLine("Nenhuma despesa cadastrada para editar.");
+                return;
+            }
+
+            Console.Write("Digite o ID da despesa que deseja editar: ");
+            if (!int.TryParse(Console.ReadLine(), out int id))
+            {
+                Console.WriteLine("ID inválido.");
+                return;
+            }
+
+            // Localizar a despesa pelo ID
+            var despesa = Array.Find(despesas, d => d != null && d.Id == id);
+
+            if (despesa == null)
+            {
+                Console.WriteLine("Despesa não encontrada.");
+                return;
+            }
+
+            // Editar os campos da despesa
+            Console.WriteLine($"Editando despesa: {despesa.Nome}");
+            Console.Write("Digite o novo nome da despesa (ou pressione Enter para manter): ");
+            string novoNome = Console.ReadLine();
+            if (!string.IsNullOrEmpty(novoNome))
+            {
+                despesa.Nome = novoNome;
+            }
+
+            Console.Write("Digite o novo valor da despesa (ou pressione Enter para manter): ");
+            string novoValor = Console.ReadLine();
+            if (float.TryParse(novoValor, out float valor))
+            {
+                despesa.Valor = valor;
+            }
+
+            Console.Write("Digite a nova data de vencimento (dd/MM/yyyy) (ou pressione Enter para manter): ");
+            string novaData = Console.ReadLine();
+            if (!string.IsNullOrEmpty(novaData) &&
+                DateTime.TryParseExact(novaData, "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime data))
+            {
+                despesa.DataVencimento = data;
+            }
+
+            Console.WriteLine("Despesa atualizada com sucesso!");
+        }
+
+        static void deletarDespesa(Despesa[] despesas, ref int contador)
+        {
+            if (contador == 0)
+            {
+                Console.WriteLine("Nenhuma despesa cadastrada para deletar.");
+                return;
+            }
+
+            Console.Write("Digite o ID da despesa que deseja deletar: ");
+            if (!int.TryParse(Console.ReadLine(), out int id))
+            {
+                Console.WriteLine("ID inválido.");
+                return;
+            }
+
+            // Localizar o índice da despesa pelo ID
+            int indice = Array.FindIndex(despesas, d => d != null && d.Id == id);
+
+            if (indice == -1)
+            {
+                Console.WriteLine("Despesa não encontrada.");
+                return;
+            }
+
+            // Reorganizar o array: "puxar" os elementos para frente
+            for (int i = indice; i < contador - 1; i++)
+            {
+                despesas[i] = despesas[i + 1];
+            }
+
+            // Remover o último elemento ativo
+            despesas[contador - 1] = null;
+            contador--;
+
+            Console.WriteLine("Despesa deletada com sucesso!");
+        }
+
+
+
+
+
+    }
+}
